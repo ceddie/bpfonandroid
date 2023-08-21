@@ -276,12 +276,12 @@ int this_name_has_no_purpose()
     // ENTRY TRACING SEGMENT: java.io.File.delete()
     // entry tracing segment for java.io.File.delete()
     if (event_ptr->context_ip == ADR_JAVA__IO__FILE__DELETE__) { // java.io.File.delete()
-        bpf_send_signal(SIGSTOP);
-        char msg1[] = "Sent signal SIGSTOP to process.";
-        write_msg_to_event(msg1, event_ptr, sizeof(msg1));
-        events.perf_submit(ctx, event_ptr, sizeof(*event_ptr));
-        char msg2[] = "...";
-        write_msg_to_event(msg2, event_ptr, sizeof(msg2));
+        //bpf_send_signal(SIGSTOP);
+        //char msg1[] = "Sent signal SIGSTOP to process.";
+        //write_msg_to_event(msg1, event_ptr, sizeof(msg1));
+        //events.perf_submit(ctx, event_ptr, sizeof(*event_ptr));
+        //char msg2[] = "...";
+        //write_msg_to_event(msg2, event_ptr, sizeof(msg2));
     }
 
     // RETURN TRACING SEGMENT: java.io.File.getPath()
@@ -331,5 +331,11 @@ int this_name_has_no_purpose()
             to_read = string_length;
         }
         bpf_probe_read_user_str(&event_ptr->payload_bytes, to_read, (void *) string_obj_adr + 0x10);
+    }
+
+    // ENTRY TRACING SEGMENT: android_getaddrinfofornet
+    // entry tracing segment for android_getaddrinfofornet
+    if (event_ptr->context_ip == ADR_ANDROID_GETADDRINFOFORNET) {
+        //ctx->ax = 1;
     }
 }
