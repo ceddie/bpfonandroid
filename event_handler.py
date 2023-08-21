@@ -6,7 +6,7 @@ import config
 import helper
 from helper import unsigned_to_signed64, EventType, print_event
 
-TGID_EVENT_DATA_DICT = {}  # tgid -> function name -> event handler specific data
+TID_EVENT_DATA_DICT = {}  # tid -> function name -> event handler specific data
 
 
 # ##### getdents64 ######
@@ -45,16 +45,16 @@ def openat_syscall_event_handler(static_info, e):
 # int execve(const char *filename, char *const argv[], char *const envp[]);
 # On success, execve() does not return, on error -1 is returned, and errno is set appropriately.
 def process_execve_syscall_final_event(static_info, e):
-    tgid_store_dict = TGID_EVENT_DATA_DICT.get(e.tgid, None)
-    if not tgid_store_dict:
-        helper.LOGGER.info("DEBUG: tgid_store_dict is empty for a final event")
+    tid_store_dict = TID_EVENT_DATA_DICT.get(e.tid, None)
+    if not tid_store_dict:
+        helper.LOGGER.info("DEBUG: tid_store_dict is empty for a final event")
         return
-    stored_value = tgid_store_dict.get(static_info['name'], None)
+    stored_value = tid_store_dict.get(static_info['name'], None)
     if not stored_value:
         helper.LOGGER.info("DEBUG: store_value is empty for a final event")
         return
     print_event(static_info, e, b"%s" % stored_value)
-    del tgid_store_dict[static_info['name']]
+    del tid_store_dict[static_info['name']]
 
 
 # ##### execve (Entry-Event) ######
@@ -65,21 +65,21 @@ def process_execve_syscall_entry_event(static_info, e):
     payload_string = bytearray(e.payload_bytes).split(b'\x00')[0]
     if config.DEBUG:
         helper.LOGGER.info("DEBUG: Partial event: %s" % payload_string)
-    interim_data_dict = TGID_EVENT_DATA_DICT.get(e.tgid, None)
+    interim_data_dict = TID_EVENT_DATA_DICT.get(e.tid, None)
     if not interim_data_dict:
-        # TGID_INTERIM_DATA_DICT is empty for this tgid; initialize empty dict
-        TGID_EVENT_DATA_DICT[e.tgid] = {}
-        interim_data_dict = TGID_EVENT_DATA_DICT[e.tgid]
+        # TID_EVENT_DATA_DICT is empty for this tid; initialize empty dict
+        TID_EVENT_DATA_DICT[e.tid] = {}
+        interim_data_dict = TID_EVENT_DATA_DICT[e.tid]
     execve_stored_value = interim_data_dict.get(static_info['name'], None)
     if not execve_stored_value:
-        # this event is the first execve interim event for this tgid
+        # this event is the first execve interim event for this tid
         if config.DEBUG:
-            helper.LOGGER.info("DEBUG: first execve interim event for this tgid")
+            helper.LOGGER.info("DEBUG: first execve interim event for this tid")
         interim_data_dict[static_info['name']] = payload_string
     else:
-        # a stored value exists for execve for this tgid
+        # a stored value exists for execve for this tid
         if config.DEBUG:
-            helper.LOGGER.info("DEBUG: a stored value exists for execve for this tgid")
+            helper.LOGGER.info("DEBUG: a stored value exists for execve for this tid")
         interim_data_dict[static_info['name']] += b' ' + payload_string
 
 
