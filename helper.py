@@ -313,7 +313,7 @@ def get_package_name_from_apk(path):
     cmd_str = f"aapt dump badging {path} | grep -o -P \"package: name='.*?'\" | cut -c 16- | rev | cut -c 2- | rev"
     res = subprocess.run(cmd_str, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if 'aapt: command not found' in res.stderr.decode().strip():
-        print(f"ERROR: Didn't find aapt. Is it installed correctly?")
+        print(f"ERROR: Didn't find aapt. Is it already installed?")
         print("Hint: eadb # apt-get install aapt")
         print("")
         exit()
@@ -666,7 +666,7 @@ def add_event_handler(probe_name, event_handler):
     if probe_name in INVERTED_LOOKUP_TABLE:
         STATIC_INFO_LOOKUP_TABLE[INVERTED_LOOKUP_TABLE[probe_name]]['event_handler'] = event_handler
     else:
-        LOGGER.info(f"WARNING: Error when adding an event handler. No probe with name '{probe_name}' in lookup table.")
+        LOGGER.info(f"WARNING: Error when adding an event handler. No function with name '{probe_name}' in lookup table.")
 
 
 def add_tracing_segment(probe_name, segment, segments):
@@ -677,7 +677,7 @@ def add_tracing_segment(probe_name, segment, segments):
         if config.DEBUG:
             LOGGER.info(f"INFO: Added tracing segment for {probe_name}:\n{segment}")
     else:
-        LOGGER.info(f"WARNING: Error when adding a tracing segment. No probe with name '{probe_name}' in lookup table.")
+        LOGGER.info(f"WARNING: Error when adding a tracing segment. No function with name '{probe_name}' in lookup table.")
 
 
 def apply_entry_tracing_segments(segments_without_override, segments_with_override, bpf_program):
