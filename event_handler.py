@@ -45,7 +45,7 @@ def openat_syscall_event_handler(static_info, e):
 # int execve(const char *filename, char *const argv[], char *const envp[]);
 # On success, execve() does not return, on error -1 is returned, and errno is set appropriately.
 def process_execve_syscall_final_event(static_info, e):
-    tid_store_dict = TID_EVENT_DATA_DICT.get(e.tid, None)
+    tid_store_dict = TID_EVENT_DATA_DICT.get(e.pid, None)
     if not tid_store_dict:
         helper.LOGGER.info("DEBUG: tid_store_dict is empty for a final event")
         return
@@ -65,11 +65,11 @@ def process_execve_syscall_entry_event(static_info, e):
     payload_string = bytearray(e.payload_bytes).split(b'\x00')[0]
     if config.DEBUG:
         helper.LOGGER.info("DEBUG: Partial event: %s" % payload_string)
-    interim_data_dict = TID_EVENT_DATA_DICT.get(e.tid, None)
+    interim_data_dict = TID_EVENT_DATA_DICT.get(e.pid, None)
     if not interim_data_dict:
         # TID_EVENT_DATA_DICT is empty for this tid; initialize empty dict
-        TID_EVENT_DATA_DICT[e.tid] = {}
-        interim_data_dict = TID_EVENT_DATA_DICT[e.tid]
+        TID_EVENT_DATA_DICT[e.pid] = {}
+        interim_data_dict = TID_EVENT_DATA_DICT[e.pid]
     execve_stored_value = interim_data_dict.get(static_info['name'], None)
     if not execve_stored_value:
         # this event is the first execve interim event for this tid
